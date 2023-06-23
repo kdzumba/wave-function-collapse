@@ -1,5 +1,5 @@
 //
-// Created by User on 2023/06/10.
+// Created by Kdzumba on 2023/06/10.
 //
 
 #ifndef WAVE_FUNCTION_COLLAPSE_BOARDBLOCK_H

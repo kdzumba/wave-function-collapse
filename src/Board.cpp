@@ -1,5 +1,5 @@
 //
-// Created by User on 2023/06/10.
+// Created by Kdzumba on 2023/06/10.
 //
 
 #include "Board.h"
@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <map>
 #include <iostream>
+#include <iomanip>
 
 int Board::s_stack_counter = 0;
 
@@ -58,15 +59,13 @@ void Board::propagate_collapse_info(int row_number, int col_number, int value)
     // Remove exclusions from available options of blocks at row_number
     for(const auto& block : m_board.at(row_number))
     {
-        block->remove_option(value);
-        auto current_row_options = block -> get_available_options();
+        block -> remove_option(value);
+        auto new_row_options = std::vector<int>();
 
-        std::set_difference(block -> get_available_options().begin(),
-                            block -> get_available_options().end(),
-                            row_exclusions.begin(),
-                            row_exclusions.end(),
-                            current_row_options.begin());
-        block ->set_available_options(current_row_options);
+        //We need options that haven't been excluded by the current generate, hence set_difference
+        std::set_difference(block -> get_available_options().begin(), block -> get_available_options().end(),
+                            row_exclusions.begin(), row_exclusions.end(), std::inserter(new_row_options, new_row_options.begin()));
+        block ->set_available_options(new_row_options);
     }
 
     //remove start_value from available_options of col col_number
@@ -75,13 +74,11 @@ void Board::propagate_collapse_info(int row_number, int col_number, int value)
     {
         _row.at(col_number)->remove_option(value);
         auto current_col_options = _row.at(col_number) -> get_available_options();
+        const auto& block = _row.at(col_number);
 
-        std::set_difference(_row.at(col_number) -> get_available_options().begin(),
-                            _row.at(col_number) -> get_available_options().end(),
-                            col_exclusions.begin(),
-                            col_exclusions.end(),
-                            current_col_options.begin());
-        _row.at(col_number) ->set_available_options(current_col_options);
+        std::set_difference(block -> get_available_options().begin(),block -> get_available_options().end(),
+                            col_exclusions.begin(),col_exclusions.end(),current_col_options.begin());
+        block ->set_available_options(current_col_options);
     }
 
     //remove start_value from available_options of 3x3 surrounding block
@@ -97,80 +94,62 @@ void Board::propagate_collapse_info(int row_number, int col_number, int value)
             block->remove_option(value);
             auto current_sqr_options = block -> get_available_options();
 
-            std::set_difference(block -> get_available_options().begin(),
-                                block -> get_available_options().end(),
-                                sqr_exclusions.begin(),
-                                sqr_exclusions.end(),
-                                current_sqr_options.begin());
+            std::set_difference(block -> get_available_options().begin(),block -> get_available_options().end(),
+                                sqr_exclusions.begin(),sqr_exclusions.end(),current_sqr_options.begin());
             block ->set_available_options(current_sqr_options);
         }
     }
 }
 
+void Board::collapse(BoardBlock* block)
+{
+    auto rand_index = generate_random_int(0, (int) block -> get_available_options().size() - 1);
+    auto next_value = block -> get_available_options().at(rand_index);
+    block -> set_collapsed_value(next_value);
+    block -> set_current_block(true);
+    m_current_collapsed -> set_current_block(false);
+    block -> set_previous(m_current_collapsed);
+
+    m_current_collapsed = block;
+    auto row_number = std::get<0>(block -> get_coordinate());
+    auto col_number = std::get<1>(block -> get_coordinate());
+
+    propagate_collapse_info(row_number, col_number, next_value);
+}
+
+
+BoardBlock* Board::backtrack()
+{
+    auto current = m_current_collapsed;
+
+    while(current -> get_available_options().empty())
+    {
+        current = current -> get_previous();
+    }
+
+    std::cout << "Backtracking" << std::endl;
+    auto current_value = current -> get_collapsed_value();
+    current -> set_collapsed_value(0);
+    propagate_decollapse_info(std::get<0>(current -> get_coordinate()), std::get<1>(current -> get_coordinate()), current_value);
+
+    return current;
+}
+
 const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& Board::generate()
 {
     s_stack_counter ++;
-    //Collapse the next block with the least entropy
     auto next_block = least_entropy_block();
 
-    //If there are no more available options for the next block, we've reached a dead end, and we need to
-    //backtrack to a valid board configuration
     if(next_block -> get_entropy() == 0)
-    {
-        auto current = m_current_collapsed;
+        next_block = backtrack();
 
-        //Reset all blocks that didn't have any remaining options at the time when they were set
-        while(current->get_remaining_options().empty())
-        {
-            //Propagate de-collapse info then reset
-            auto current_x = std::get<0>(current -> get_coordinate());
-            auto current_y = std::get<1>(current -> get_coordinate());
+    collapse(next_block);
 
-            propagate_decollapse_info(current_x, current_y, current -> get_collapsed_value());
-            current -> set_collapsed_value(0);
-            current = current -> get_previous();
-        }
-
-        //Don't like the repetition here, but we need to de-collapse the last successfully placed block and remove
-        //the last value it had from its available options
-        auto current_x = std::get<0>(current -> get_coordinate());
-        auto current_y = std::get<1>(current -> get_coordinate());
-
-        propagate_decollapse_info(current_x, current_y, current -> get_collapsed_value());
-        //If the option was re-added by the de-collapse, remove again
-        current ->remove_option(current -> get_collapsed_value());
-
-        next_block = current;
-        if(next_block -> get_previous() != nullptr)
-        {
-            //The previous current_collapsed should be reset before reassigning the pointer
-            //So that we don't have two blocks marked as current_blocks
-            m_current_collapsed->set_current_block(false);
-            m_current_collapsed = next_block->get_previous();
-        }
-        print_available_items();
-    }
-
-    //Choose next value from available options for next_block. We know it has at least 1 because otherwise we would backtrack
-    auto rand_index = generate_random_int(0, (int) next_block -> get_available_options().size() - 1);
-    auto next_value = next_block -> get_available_options().at(rand_index);
-    next_block -> set_collapsed_value(next_value);
-    next_block -> set_current_block(true);
-    m_current_collapsed -> set_current_block(false);
-    next_block -> set_previous(m_current_collapsed);
-
-    m_current_collapsed = next_block;
-    auto row_number = std::get<0>(next_block -> get_coordinate());
-    auto col_number = std::get<1>(next_block -> get_coordinate());
-
-    propagate_collapse_info(row_number, col_number, next_value);
     print();
 
-    //Need to check if the block is full and terminate, otherwise generate()
-    if(!is_fully_generated())
+    if(!is_fully_generated() && s_stack_counter < MAX_GENERATE_RETRIES)
         generate();
 
-//    print();
     return m_board;
 }
 
@@ -195,7 +174,8 @@ BoardBlock* Board::least_entropy_block()
     {
         for(const auto & block : row)
         {
-            if(block -> get_collapsed_value() == 0) //Only consider blocks that haven't been collapsed yet
+            //Only consider blocks that haven't been collapsed yet
+            if(block-> get_collapsed_value() == 0)
             {
                 unsigned int key = block -> get_entropy();
                 if(entropy_to_block_map.find(key) != entropy_to_block_map.end() && key != 0)
@@ -234,21 +214,31 @@ bool Board::is_fully_generated() const
 void Board::print()
 {
     std::cout << "Recursive call count: " << s_stack_counter << std::endl;
+    std::cout << std::setw(4) << 0;
+
+    for(auto col : {1, 2, 3, 4, 5, 6, 7, 8})
+        std::cout << std::setw(2) << col;
+    std::cout << std::endl << "_______________________" << std::endl;
+
+    int row_count = 0;
     for(const auto& row : m_board)
     {
+        std::cout << row_count << "| ";
         for(const auto& block : row)
         {
             std::cout << block -> get_collapsed_value() << " ";
         }
+        row_count++;
         std::cout << std::endl;
     }
     printf("\n");
 }
 
 /**
- *
+ * When a collapse/de-generate happens, we need to re-compute the values that aren't available to blocks in the same row
+ * as the collapsed/de-collapsed block
  * @param row_number The row number for which we want to compute the values that aren't available to blocks in that row
- * @return A vector of values that elements of row_number can't take
+ * @return A vector of values that blocks in row_number can't take
  */
 
 std::vector<int> Board::get_row_exclusions(int row_number)
@@ -265,6 +255,12 @@ std::vector<int> Board::get_row_exclusions(int row_number)
     return row_exclusions;
 }
 
+/**
+ * When a collapse/de-generate happens, we need to re-compute the values that aren't available to blocks in the same row
+ * as the collapsed/de-collapsed block
+ * @param col_number The col number for which we want to compute the values that aren't available to blocks in that col
+ * @return A vector of values that blocks in col_number can't take
+ */
 std::vector<int> Board::get_col_exclusions(int col_number)
 {
     auto col_exclusions = std::vector<int>();
@@ -278,6 +274,12 @@ std::vector<int> Board::get_col_exclusions(int col_number)
     return col_exclusions;
 }
 
+/**
+ *
+ * @param row_number The row number for the collapsed item
+ * @param col_number The col number for the collapsed item
+ * @return A vector of values that blocks in the same 3x3 block as (row,col) can't take
+ */
 std::vector<int> Board::get_sqr_exclusions(int row_number, int col_number)
 {
     auto sqr_exclusions = std::vector<int>();
@@ -311,13 +313,22 @@ void Board::propagate_decollapse_info(int row, int col, int value)
     //Every block in row should get value added to their available options
     for(const auto& block : m_board.at(row))
     {
-        block -> add_available_option(value);
+        auto current_row = std::get<0>(block -> get_coordinate());
+        auto current_col = std::get<1>(block -> get_coordinate());
+
+        if(!(current_row == row && current_col == col) && is_safe(current_row, current_col, value))
+            block -> add_available_option(value);
     }
 
     //Every block in col should get value added back to their available options
     for(const auto& _row : m_board)
     {
-        _row.at(col) ->add_available_option(value);
+        const auto& block = _row.at(col);
+        auto current_row = std::get<0>(block -> get_coordinate());
+        auto current_col = std::get<1>(block -> get_coordinate());
+
+        if(!(current_row == row && current_col == col) && is_safe(current_row, current_col, value))
+            block -> add_available_option(value);
     }
 
     int start_row_index = row - row % MIN_FULL_BLOCK_SIZE;
@@ -328,12 +339,20 @@ void Board::propagate_decollapse_info(int row, int col, int value)
         for(auto n = 0; n < MIN_FULL_BLOCK_SIZE; n++)
         {
             const auto& block = m_board.at(m + start_row_index).at(n + start_col_index);
-            block ->add_available_option(value);
+            auto current_row = std::get<0>(block -> get_coordinate());
+            auto current_col = std::get<1>(block -> get_coordinate());
+
+            if(!(current_row == row && current_col == col) && is_safe(current_row, current_col, value))
+                block -> add_available_option(value);
         }
     }
 }
 
-void Board::print_available_items()
+
+/**
+ * Only used for debugging to see available options for blocks at a certain point in the code
+ */
+void Board::print_available_options()
 {
     for(const auto& row : m_board)
     {
@@ -349,6 +368,31 @@ void Board::print_available_items()
         std::cout << std::endl;
     }
     printf("\n");
+}
+
+
+/**
+ * Before adding a value back to a block's available options, we need to check if it's still a safe option for the block
+ * as this might have changed due to some change that has already happened on the board
+ * @param row The row number at which the block is found
+ * @param col The col number at which the block is found
+ * @param value The value we'd like to place back into available options for the block
+ * @return True if placing the option doesn't violate constraints of the game, false otherwise
+ */
+bool Board::is_safe(int row, int col, int value)
+{
+    auto row_exclusions = get_row_exclusions(row);
+    if(std::find(row_exclusions.begin(), row_exclusions.end(), value) != row_exclusions.end())
+        return false;
+
+    auto col_exclusions = get_col_exclusions(col);
+    if(std::find(col_exclusions.begin(), col_exclusions.end(), value) != col_exclusions.end())
+        return false;
+
+    auto sqr_exclusions = get_sqr_exclusions(row, col);
+    if(std::find(sqr_exclusions.begin(), sqr_exclusions.end(), value) != sqr_exclusions.end())
+        return false;
+    return true;
 }
 
 
