@@ -26,7 +26,7 @@ Board::Board()
     }
     m_current_collapsed = nullptr;
     init();
-    generate();
+    solve();
 }
 
 void Board::init()
@@ -62,7 +62,7 @@ void Board::propagate_collapse_info(int row_number, int col_number, int value)
         block -> remove_option(value);
         auto new_row_options = std::vector<int>();
 
-        //We need options that haven't been excluded by the current generate, hence set_difference
+        //We need options that haven't been excluded by the current solve, hence set_difference
         std::set_difference(block -> get_available_options().begin(), block -> get_available_options().end(),
                             row_exclusions.begin(), row_exclusions.end(), std::inserter(new_row_options, new_row_options.begin()));
         block ->set_available_options(new_row_options);
@@ -108,7 +108,9 @@ void Board::collapse(BoardBlock* block)
     block -> set_collapsed_value(next_value);
     block -> set_current_block(true);
     m_current_collapsed -> set_current_block(false);
-    block -> set_previous(m_current_collapsed);
+
+    if(block != m_current_collapsed)
+        block -> set_previous(m_current_collapsed);
 
     m_current_collapsed = block;
     auto row_number = std::get<0>(block -> get_coordinate());
@@ -117,17 +119,41 @@ void Board::collapse(BoardBlock* block)
     propagate_collapse_info(row_number, col_number, next_value);
 }
 
-
+/**
+ * This method finds the first previously collapsed block that still has other available options that can
+ * replace it's current collapsed value
+ * @return The next block to be collapsed.
+ */
 BoardBlock* Board::backtrack()
 {
+    std::cout << "Backtracking" << std::endl;
     auto current = m_current_collapsed;
 
-    while(current -> get_available_options().empty())
+    while(current != nullptr && current -> get_available_options().empty())
     {
         current = current -> get_previous();
     }
 
-    std::cout << "Backtracking" << std::endl;
+    if(current == nullptr)
+    {
+        std::cout << "nullptr scenario occurred" << std::endl;
+        //Could have used std::find_if here if m_board wasn't a vector of unique_ptr
+        for(const auto& row : m_board)
+        {
+            for(const auto& block : row)
+            {
+                if(block -> get_collapsed_value() == 0 && block -> get_entropy() != 0)
+                {
+                    return block.get();
+                }
+            }
+        }
+    }
+
+    //We've done all we could, time to give up
+    if(current == nullptr)
+        return nullptr;
+
     auto current_value = current -> get_collapsed_value();
     current -> set_collapsed_value(0);
     propagate_decollapse_info(std::get<0>(current -> get_coordinate()), std::get<1>(current -> get_coordinate()), current_value);
@@ -135,7 +161,11 @@ BoardBlock* Board::backtrack()
     return current;
 }
 
-const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& Board::generate()
+/**
+ * Continuously solves a sudoku puzzle using wave function collapse and backtracking
+ * @return A 2-dimensional vector of unique_ptr to BoardBlock, which represents a fully solved sudoku
+ */
+const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& Board::solve()
 {
     s_stack_counter ++;
     auto next_block = least_entropy_block();
@@ -143,23 +173,37 @@ const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& Board::generate()
     if(next_block -> get_entropy() == 0)
         next_block = backtrack();
 
+    if(next_block == nullptr)
+    {
+        std::cout << "Could not solve board, please try again" << std::endl;
+        return m_board;
+    }
     collapse(next_block);
 
     print();
 
-    if(!is_fully_generated() && s_stack_counter < MAX_GENERATE_RETRIES)
-        generate();
+    if(!is_fully_solved() && s_stack_counter < MAX_GENERATE_RETRIES)
+        solve();
 
     return m_board;
 }
 
-
+/**
+ * Generates a tuple that consists of a row number and column number for a sudoku board [0, 8]
+ * @return A tuple representing the coordinate of a block within a sudoku board [0,8]
+ */
 std::tuple<int, int> Board::random_coordinate() {
     int x = generate_random_int(0, 8);
     int y = generate_random_int(0, 8);
     return std::make_tuple(x, y);
 }
 
+/**
+ * Generates a random integer in the range [start, end]
+ * @param start The minimum integer that can be generated
+ * @param end The maximum integer that can be generated
+ * @return A random integer in the range [start, end]
+ */
 int Board::generate_random_int(int start, int end) {
     std::random_device rd;
     std::mt19937 generator(rd());
@@ -167,6 +211,10 @@ int Board::generate_random_int(int start, int end) {
     return distribution(generator);
 }
 
+/**
+ * Finds the block with the least entropy within a sudoku board
+ * @return A pointer to a BoardBlock with the least entropy, given by BoardBlock::get_entropy()
+ */
 BoardBlock* Board::least_entropy_block()
 {
     std::map<unsigned int, std::vector<BoardBlock*>> entropy_to_block_map;
@@ -196,7 +244,10 @@ BoardBlock* Board::least_entropy_block()
     return min_entropy.at(rand_index);
 }
 
-bool Board::is_fully_generated() const
+/**
+ * @return true if the sudoku board is completely solved, false otherwise
+ */
+bool Board::is_fully_solved() const
 {
     bool is_full = true;
     for(const auto& row : m_board)
@@ -210,7 +261,9 @@ bool Board::is_fully_generated() const
     return is_full;
 }
 
-
+/**
+ * Debug function to see the state of the sudoku board at any point in time
+ */
 void Board::print()
 {
     std::cout << "Recursive call count: " << s_stack_counter << std::endl;
@@ -235,7 +288,7 @@ void Board::print()
 }
 
 /**
- * When a collapse/de-generate happens, we need to re-compute the values that aren't available to blocks in the same row
+ * When a collapse/de-solve happens, we need to re-compute the values that aren't available to blocks in the same row
  * as the collapsed/de-collapsed block
  * @param row_number The row number for which we want to compute the values that aren't available to blocks in that row
  * @return A vector of values that blocks in row_number can't take
@@ -256,7 +309,7 @@ std::vector<int> Board::get_row_exclusions(int row_number)
 }
 
 /**
- * When a collapse/de-generate happens, we need to re-compute the values that aren't available to blocks in the same row
+ * When a collapse/de-solve happens, we need to re-compute the values that aren't available to blocks in the same row
  * as the collapsed/de-collapsed block
  * @param col_number The col number for which we want to compute the values that aren't available to blocks in that col
  * @return A vector of values that blocks in col_number can't take
@@ -310,6 +363,9 @@ std::vector<int> Board::get_sqr_exclusions(int row_number, int col_number)
  */
 void Board::propagate_decollapse_info(int row, int col, int value)
 {
+    const auto& being_decollapsed = m_board.at(row).at(col).get();
+    auto has_exchanged = exchange_previous(being_decollapsed);
+
     //Every block in row should get value added to their available options
     for(const auto& block : m_board.at(row))
     {
@@ -346,6 +402,9 @@ void Board::propagate_decollapse_info(int row, int col, int value)
                 block -> add_available_option(value);
         }
     }
+
+    if(has_exchanged)
+        being_decollapsed -> set_previous(nullptr);
 }
 
 
@@ -395,4 +454,27 @@ bool Board::is_safe(int row, int col, int value)
     return true;
 }
 
+/**
+ * During de-collapse, we need to update the previous block for all the blocks whose previous was the block that's
+ * being de-collapsed
+ * @param previous The block being de-collapsed
+ * @return True if an exchange happened, false otherwise.
+ */
+bool Board::exchange_previous(BoardBlock *previous)
+{
+    bool has_exchanged = false;
 
+    for(const auto& row : m_board)
+    {
+        for(const auto& block : row)
+        {
+            if(block -> get_previous() == previous) {
+                std::cout << "Swapping occurred" << std::endl;
+                block->set_previous(previous->get_previous());
+                has_exchanged = true;
+            }
+        }
+    }
+
+    return has_exchanged;
+}

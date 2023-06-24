@@ -3,7 +3,6 @@ C:/Users/User/CLionProjects/wave-function-collapse/src/main.cpp
 C:/Users/User/CLionProjects/wave-function-collapse/src/Board.h
 C:/Users/User/CLionProjects/wave-function-collapse/src/BoardBlock.h
 C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.h
-C:/Users/User/CLionProjects/wave-function-collapse/src/Board.cpp
 C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.h
  mmc:Q_OBJECT
  mdp:C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.h
@@ -364,6 +363,8 @@ C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.h
  mdp:C:/Users/User/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/bin/mingw/x86_64-w64-mingw32/include/vadefs.h
  mdp:C:/Users/User/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/bin/mingw/x86_64-w64-mingw32/include/wchar.h
  mdp:C:/Users/User/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/bin/mingw/x86_64-w64-mingw32/include/wctype.h
+C:/Users/User/CLionProjects/wave-function-collapse/src/Board.cpp
+C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.h
 C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.h
  mmc:Q_OBJECT
  mdp:C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.h
@@ -731,9 +732,8 @@ C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.h
  mdp:C:/Users/User/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/bin/mingw/x86_64-w64-mingw32/include/wchar.h
  mdp:C:/Users/User/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/bin/mingw/x86_64-w64-mingw32/include/wctype.h
  mdp:C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.h
-C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.h
-C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.cpp
 C:/Users/User/CLionProjects/wave-function-collapse/src/BoardBlock.cpp
+C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.cpp
 C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.cpp
 C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.cpp
 C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.cpp

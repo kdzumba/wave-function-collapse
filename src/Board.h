@@ -16,13 +16,14 @@ class Board
 public:
     Board();
 private:
-    const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& generate();
+    const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& solve();
     void collapse(BoardBlock* block);
     BoardBlock* backtrack();
-    bool is_fully_generated() const;
+    bool is_fully_solved() const;
     static std::tuple<int, int> random_coordinate();
     static int generate_random_int(int start, int end);
     void print_available_options();
+    bool exchange_previous(BoardBlock *previous);
     BoardBlock* least_entropy_block();
     void init();
     void print();
@@ -39,7 +40,7 @@ private:
     static int constexpr BOARD_SIZE = 9;
     static int constexpr MIN_FULL_BLOCK_SIZE = 3;
     static int s_stack_counter;
-    static int constexpr MAX_GENERATE_RETRIES = 2000;
+    static int constexpr MAX_GENERATE_RETRIES = 10000;
 };
 
 #endif //WAVE_FUNCTION_COLLAPSE_BOARD_H
