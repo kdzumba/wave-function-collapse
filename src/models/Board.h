@@ -11,22 +11,27 @@
 #include <memory>
 #include "BoardBlock.h"
 
+using SudokuBoard = std::vector<std::vector<std::unique_ptr<BoardBlock>>>;
+
 class Board
 {
 public:
     Board();
+    explicit Board(const std::string& filename);
+    void init_solve();
+    const SudokuBoard& solve();
+    void print_available_options();
+    void print();
+
 private:
-    const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& solve();
+    void read_from_file(const std::string& filename);
     void collapse(BoardBlock* block);
     BoardBlock* backtrack();
     bool is_fully_solved() const;
     static std::tuple<int, int> random_coordinate();
     static int generate_random_int(int start, int end);
-    void print_available_options();
     bool exchange_previous(BoardBlock *previous);
     BoardBlock* least_entropy_block();
-    void init();
-    void print();
     void propagate_collapse_info(int row, int col, int value);
     void propagate_decollapse_info(int row, int col, int value);
     std::vector<int> get_row_exclusions(int row_number);

@@ -8,6 +8,7 @@
 #include <map>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 int Board::s_stack_counter = 0;
 
@@ -25,21 +26,28 @@ Board::Board()
         m_board.emplace_back(std::move(row));
     }
     m_current_collapsed = nullptr;
-    init();
-    solve();
 }
 
-void Board::init()
+Board::Board(const std::string &filename): Board{}
+{
+    read_from_file(filename);
+}
+
+void Board::init_solve()
 {
     auto start_coordinate = random_coordinate();
     int x = std::get<0>(start_coordinate);
     int y = std::get<1>(start_coordinate);
+
+    const auto& initial_block = m_board.at(x).at(y);
     int start_value = generate_random_int(1, 9);
-    m_board.at(x).at(y) -> set_collapsed_value(start_value);
+
+    if(initial_block -> get_collapsed_value() == 0)
+        initial_block ->set_collapsed_value(start_value);
 
     //Setting the current_block ensures that it won't be considered for min entropy later on
-    m_board.at(x).at(y) ->set_current_block(true);
-    this -> m_current_collapsed = m_board.at(x).at(y).get();
+    initial_block -> set_current_block(true);
+    m_current_collapsed = initial_block.get();
     propagate_collapse_info(x, y, start_value);
 }
 
@@ -353,6 +361,7 @@ std::vector<int> Board::get_sqr_exclusions(int row_number, int col_number)
     return sqr_exclusions;
 }
 
+
 /**
  *
  * @param row The row number for the de-collapsed block
@@ -429,7 +438,6 @@ void Board::print_available_options()
     printf("\n");
 }
 
-
 /**
  * Before adding a value back to a block's available options, we need to check if it's still a safe option for the block
  * as this might have changed due to some change that has already happened on the board
@@ -477,4 +485,38 @@ bool Board::exchange_previous(BoardBlock *previous)
     }
 
     return has_exchanged;
+}
+
+void Board::read_from_file(const std::string &filename)
+{
+    std::ifstream input(filename);
+    if(!input.good())
+    {
+        std::cerr << "Error: could not open file: " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string input_row;
+    int row_index = 0;
+    int col_index = 0;
+
+    while(std::getline(input, input_row))
+    {
+        std::stringstream ss(input_row);
+        auto row = std::vector<std::unique_ptr<BoardBlock>>();
+
+        while(ss.good() && col_index < BOARD_SIZE)
+        {
+            int value;
+            ss >> value;
+
+            const auto& block = m_board.at(row_index).at(col_index);
+            block -> set_collapsed_value(value);
+            propagate_collapse_info(row_index, col_index, value);
+            col_index++;
+        }
+        row_index++;
+        col_index = 0;
+    }
+    input.close();
 }

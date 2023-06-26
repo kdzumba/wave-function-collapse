@@ -10,10 +10,16 @@ BoardBlock::BoardBlock():m_previous(nullptr), m_current_block(false), m_collapse
     m_available_options = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 }
 
+BoardBlock::BoardBlock(int collapsed_value):BoardBlock()
+{
+    set_collapsed_value(collapsed_value);
+}
+
 std::vector<int>& BoardBlock::get_available_options()
 {
     return m_available_options;
 }
+
 
 int BoardBlock::get_collapsed_value() const
 {
@@ -43,7 +49,6 @@ unsigned int BoardBlock::get_entropy() const
         return INT_MAX;
     return m_available_options.size();
 }
-
 
 void BoardBlock::remove_option(int value)
 {

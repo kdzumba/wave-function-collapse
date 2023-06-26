@@ -4,7 +4,7 @@
 #include "SudokuTile.h"
 #include "SudokuScene.h"
 #include "SudokuBoard.h"
-#include "Board.h"
+#include "models/Board.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +19,12 @@ int main(int argc, char *argv[])
 //    }
 
 //    auto sudoku = SudokuBoard(17);
-auto board = Board();
+auto board = Board("puzzles/puzzle3.txt");
+board.init_solve();
+board.solve();
+board.print();
+//board.init_solve();
+//board.solve();
 //    QGraphicsView view(scene);
 //    view.show();
 
