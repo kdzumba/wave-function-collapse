@@ -543,15 +543,13 @@ wave_function_collapse_autogen/timestamp: \
 	C:/Users/User/CLionProjects/wave-function-collapse/cmake-build-debug/wave_function_collapse_autogen/moc_predefs.h \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.cpp \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.h \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.cpp \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.h \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.cpp \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.h \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.cpp \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.h \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/main.cpp \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/models/Board.cpp \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/models/Board.h \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/models/BoardBlock.cpp \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/models/BoardBlock.h \
+	C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuScene.cpp \
+	C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuScene.h \
+	C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuTile.cpp \
+	C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuTile.h \
 	C:/Users/User/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/231.9161.40/bin/cmake/win/x64/bin/cmake.exe

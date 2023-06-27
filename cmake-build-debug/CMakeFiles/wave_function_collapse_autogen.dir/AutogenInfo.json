@@ -226,24 +226,6 @@
 			null
 		],
 		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.h",
-			"MU",
-			"UVLADIE3JM/moc_SudokuBoard.cpp",
-			null
-		],
-		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.h",
-			"MU",
-			"UVLADIE3JM/moc_SudokuScene.cpp",
-			null
-		],
-		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.h",
-			"MU",
-			"UVLADIE3JM/moc_SudokuTile.cpp",
-			null
-		],
-		[
 			"C:/Users/User/CLionProjects/wave-function-collapse/src/models/Board.h",
 			"MU",
 			"M4YTXQ7V2H/moc_Board.cpp",
@@ -253,6 +235,18 @@
 			"C:/Users/User/CLionProjects/wave-function-collapse/src/models/BoardBlock.h",
 			"MU",
 			"M4YTXQ7V2H/moc_BoardBlock.cpp",
+			null
+		],
+		[
+			"C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuScene.h",
+			"MU",
+			"YPKJ5OE7LN/moc_SudokuScene.cpp",
+			null
+		],
+		[
+			"C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuTile.h",
+			"MU",
+			"YPKJ5OE7LN/moc_SudokuTile.cpp",
 			null
 		]
 	],
@@ -331,21 +325,6 @@
 			null
 		],
 		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuBoard.cpp",
-			"MU",
-			null
-		],
-		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuScene.cpp",
-			"MU",
-			null
-		],
-		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/SudokuTile.cpp",
-			"MU",
-			null
-		],
-		[
 			"C:/Users/User/CLionProjects/wave-function-collapse/src/main.cpp",
 			"MU",
 			null
@@ -357,6 +336,16 @@
 		],
 		[
 			"C:/Users/User/CLionProjects/wave-function-collapse/src/models/BoardBlock.cpp",
+			"MU",
+			null
+		],
+		[
+			"C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuScene.cpp",
+			"MU",
+			null
+		],
+		[
+			"C:/Users/User/CLionProjects/wave-function-collapse/src/ui/SudokuTile.cpp",
 			"MU",
 			null
 		]
