@@ -14,7 +14,7 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(wave_function_collapse src/main.cpp src/MainApplicationWindow.cpp src/MainApplicationWindow.h src/SudokuTile.cpp src/SudokuTile.h src/SudokuScene.cpp src/SudokuScene.h src/SudokuBoard.cpp src/SudokuBoard.h src/BoardBlock.cpp src/BoardBlock.h src/Board.cpp src/Board.h)
+add_executable(wave_function_collapse src/main.cpp src/MainApplicationWindow.cpp src/MainApplicationWindow.h src/ui/SudokuTile.cpp src/ui/SudokuTile.h src/ui/SudokuScene.cpp src/ui/SudokuScene.h src/models/BoardBlock.cpp src/models/BoardBlock.h src/models/Board.cpp src/models/Board.h)
 target_link_libraries(wave_function_collapse
         Qt::Core
         Qt::Gui

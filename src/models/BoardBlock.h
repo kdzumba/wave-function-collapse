@@ -13,6 +13,7 @@ class BoardBlock
 {
 public:
     BoardBlock();
+    BoardBlock(int collapsed_value);
     std::vector<int>& get_available_options();
     void exchange_previous(BoardBlock* previous, BoardBlock* next);
     std::vector<int> get_remaining_options() const;

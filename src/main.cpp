@@ -1,27 +1,24 @@
 #include <QApplication>
 #include <QGraphicsView>
-#include "MainApplicationWindow.h"
-#include "SudokuTile.h"
-#include "SudokuScene.h"
-#include "SudokuBoard.h"
-#include "Board.h"
+#include "ui/SudokuTile.h"
+#include "ui/SudokuScene.h"
+#include "models/Board.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-//    auto* scene = new SudokuScene();
-//    auto tiles = scene -> GetSudokuTiles();
-//    for(const auto& row : tiles){
-//        for(auto col : row){
-//            scene ->addItem((SudokuTile*) col);
-//        }
-//    }
+    auto* scene = new SudokuScene();
+    auto tiles = scene -> GetSudokuTiles();
+    for(const auto& row : tiles){
+        for(auto col : row){
+            scene ->addItem((SudokuTile*) col);
+        }
+    }
 
-//    auto sudoku = SudokuBoard(17);
-auto board = Board();
-//    QGraphicsView view(scene);
-//    view.show();
+    auto* view = new QGraphicsView(scene);
+    view -> setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    view -> show();
 
     return QApplication::exec();
 }
