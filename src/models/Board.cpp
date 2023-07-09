@@ -14,6 +14,17 @@ int Board::s_stack_counter = 0;
 
 Board::Board()
 {
+    init_board();
+    m_current_collapsed = nullptr;
+}
+
+Board::Board(const std::string &filename): Board{}
+{
+    read_from_file(filename);
+}
+
+void Board::init_board()
+{
     for(auto x = 0; x < BOARD_SIZE; x++)
     {
         auto row = std::vector<std::unique_ptr<BoardBlock>>();
@@ -25,12 +36,6 @@ Board::Board()
         }
         m_board.emplace_back(std::move(row));
     }
-    m_current_collapsed = nullptr;
-}
-
-Board::Board(const std::string &filename): Board{}
-{
-    read_from_file(filename);
 }
 
 void Board::init_solve()
@@ -137,6 +142,8 @@ BoardBlock* Board::backtrack()
     std::cout << "Backtracking" << std::endl;
     auto current = m_current_collapsed;
 
+    //We need to go back through all previously set blocks until we find one where we could have
+    //chosen another alternative
     while(current != nullptr && current -> get_available_options().empty())
     {
         current = current -> get_previous();
@@ -183,10 +190,14 @@ const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& Board::solve()
 
     if(next_block == nullptr)
     {
-        std::cout << "Could not solve board, please try again" << std::endl;
-        return m_board;
+        std::cout << "Could not solve board, retrying" << std::endl;
+        reset();
+        init_solve();
     }
-    collapse(next_block);
+    else
+    {
+        collapse(next_block);
+    }
 
     print();
 
@@ -519,4 +530,12 @@ void Board::read_from_file(const std::string &filename)
         col_index = 0;
     }
     input.close();
+}
+
+void Board::reset()
+{
+    m_board.clear();
+    init_board();
+    m_current_collapsed = nullptr;
+    s_stack_counter = 0;
 }

@@ -10,7 +10,7 @@
 //TODO: dimensions shouldn't be greater than 9, do I even need this to be customizable?
 SudokuScene::SudokuScene()
 {
-    auto board = Board("puzzles/puzzle3.txt");
+    auto board = Board("puzzles/puzzle4.txt");
     board.init_solve();
     const auto& result_board = board.solve();
 

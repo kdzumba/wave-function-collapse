@@ -541,8 +541,8 @@ wave_function_collapse_autogen/timestamp: \
 	C:/Users/User/CLionProjects/wave-function-collapse/cmake-build-debug/CMakeFiles/3.25.2/CMakeRCCompiler.cmake \
 	C:/Users/User/CLionProjects/wave-function-collapse/cmake-build-debug/CMakeFiles/3.25.2/CMakeSystem.cmake \
 	C:/Users/User/CLionProjects/wave-function-collapse/cmake-build-debug/wave_function_collapse_autogen/moc_predefs.h \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.cpp \
-	C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.h \
+	C:/Users/User/CLionProjects/wave-function-collapse/src/WFCApplication.cpp \
+	C:/Users/User/CLionProjects/wave-function-collapse/src/WFCApplication.h \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/main.cpp \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/models/Board.cpp \
 	C:/Users/User/CLionProjects/wave-function-collapse/src/models/Board.h \

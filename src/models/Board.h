@@ -19,11 +19,13 @@ public:
     Board();
     explicit Board(const std::string& filename);
     void init_solve();
+    void reset();
     const SudokuBoard& solve();
     void print_available_options();
     void print();
 
 private:
+    void init_board();
     void read_from_file(const std::string& filename);
     void collapse(BoardBlock* block);
     BoardBlock* backtrack();
