@@ -9,15 +9,15 @@
 #include <QGraphicsScene>
 #include "SudokuTile.h"
 #include "../models/BoardBlock.h"
+#include "AbstractScene.h"
 #include <vector>
 #include <memory>
 
-class SudokuScene : public QGraphicsScene
+class SudokuScene : public AbstractScene
 {
     Q_OBJECT
 public:
     explicit SudokuScene();
-    [[nodiscard]] std::vector<std::vector<SudokuTile*>> GetSudokuTiles() const;
 private:
     static int generateRandom();
 private:

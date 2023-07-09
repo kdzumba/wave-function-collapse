@@ -1,24 +1,17 @@
 #include <QApplication>
-#include <QGraphicsView>
 #include "ui/SudokuTile.h"
-#include "ui/SudokuScene.h"
 #include "models/Board.h"
+#include "WFCApplication.h"
+#include "ui/WorkSpace.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    auto* scene = new SudokuScene();
-    auto tiles = scene -> GetSudokuTiles();
-    for(const auto& row : tiles){
-        for(auto col : row){
-            scene ->addItem((SudokuTile*) col);
-        }
-    }
+    auto* application = new WFCApplication();
+    auto* workspace = new WorkSpace();
 
-    auto* view = new QGraphicsView(scene);
-    view -> setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    view -> show();
-
+    application -> get_application_window() -> setCentralWidget(workspace -> get_graphics_view());
+    application -> get_application_window() -> showMaximized();
     return QApplication::exec();
 }

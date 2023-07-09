@@ -24,11 +24,12 @@ SudokuScene::SudokuScene()
         }
         m_tiles.emplace_back(row);
     }
-}
 
-std::vector<std::vector<SudokuTile *>> SudokuScene::GetSudokuTiles() const
-{
-    return m_tiles;
+    for(const auto& row : m_tiles){
+        for(auto col : row){
+            this -> addItem( col);
+        }
+    }
 }
 
 int SudokuScene::generateRandom()

@@ -105,6 +105,14 @@ build CMakeFiles/wave_function_collapse.dir/src/models/Board.cpp.obj: CXX_COMPIL
   OBJECT_DIR = CMakeFiles\wave_function_collapse.dir
   OBJECT_FILE_DIR = CMakeFiles\wave_function_collapse.dir\src\models
 
+build CMakeFiles/wave_function_collapse.dir/src/ui/WorkSpace.cpp.obj: CXX_COMPILER__wave_function_collapse_Debug C$:/Users/User/CLionProjects/wave-function-collapse/src/ui/WorkSpace.cpp || cmake_object_order_depends_target_wave_function_collapse
+  DEFINES = -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64
+  DEP_FILE = CMakeFiles\wave_function_collapse.dir\src\ui\WorkSpace.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/User/CLionProjects/wave-function-collapse/cmake-build-debug/wave_function_collapse_autogen/include -isystem C:/Qt/6.5.1/mingw_64/include/QtCore -isystem C:/Qt/6.5.1/mingw_64/include -isystem C:/Qt/6.5.1/mingw_64/mkspecs/win32-g++ -isystem C:/Qt/6.5.1/mingw_64/include/QtGui -isystem C:/Qt/6.5.1/mingw_64/include/QtWidgets
+  OBJECT_DIR = CMakeFiles\wave_function_collapse.dir
+  OBJECT_FILE_DIR = CMakeFiles\wave_function_collapse.dir\src\ui
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target wave_function_collapse
@@ -113,7 +121,7 @@ build CMakeFiles/wave_function_collapse.dir/src/models/Board.cpp.obj: CXX_COMPIL
 #############################################
 # Link the executable wave_function_collapse.exe
 
-build wave_function_collapse.exe: CXX_EXECUTABLE_LINKER__wave_function_collapse_Debug CMakeFiles/wave_function_collapse.dir/wave_function_collapse_autogen/mocs_compilation.cpp.obj CMakeFiles/wave_function_collapse.dir/src/main.cpp.obj CMakeFiles/wave_function_collapse.dir/src/WFCApplication.cpp.obj CMakeFiles/wave_function_collapse.dir/src/ui/SudokuTile.cpp.obj CMakeFiles/wave_function_collapse.dir/src/ui/SudokuScene.cpp.obj CMakeFiles/wave_function_collapse.dir/src/models/BoardBlock.cpp.obj CMakeFiles/wave_function_collapse.dir/src/models/Board.cpp.obj | C$:/Qt/6.5.1/mingw_64/lib/libQt6Widgets.a C$:/Qt/6.5.1/mingw_64/lib/libQt6Gui.a C$:/Qt/6.5.1/mingw_64/lib/libQt6Core.a || wave_function_collapse_autogen wave_function_collapse_autogen_timestamp_deps
+build wave_function_collapse.exe: CXX_EXECUTABLE_LINKER__wave_function_collapse_Debug CMakeFiles/wave_function_collapse.dir/wave_function_collapse_autogen/mocs_compilation.cpp.obj CMakeFiles/wave_function_collapse.dir/src/main.cpp.obj CMakeFiles/wave_function_collapse.dir/src/WFCApplication.cpp.obj CMakeFiles/wave_function_collapse.dir/src/ui/SudokuTile.cpp.obj CMakeFiles/wave_function_collapse.dir/src/ui/SudokuScene.cpp.obj CMakeFiles/wave_function_collapse.dir/src/models/BoardBlock.cpp.obj CMakeFiles/wave_function_collapse.dir/src/models/Board.cpp.obj CMakeFiles/wave_function_collapse.dir/src/ui/WorkSpace.cpp.obj | C$:/Qt/6.5.1/mingw_64/lib/libQt6Widgets.a C$:/Qt/6.5.1/mingw_64/lib/libQt6Gui.a C$:/Qt/6.5.1/mingw_64/lib/libQt6Core.a || wave_function_collapse_autogen wave_function_collapse_autogen_timestamp_deps
   FLAGS = -g
   LINK_LIBRARIES = C:/Qt/6.5.1/mingw_64/lib/libQt6Widgets.a  C:/Qt/6.5.1/mingw_64/lib/libQt6Gui.a  C:/Qt/6.5.1/mingw_64/lib/libQt6Core.a  -lmpr  -luserenv  -ld3d11  -ldxgi  -ldxguid  -ldcomp  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\wave_function_collapse.dir

@@ -20,11 +20,15 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 private:
     QString m_value;
+    bool m_border_top;
+    bool m_border_bottom;
+    bool m_border_left;
+    bool m_border_right;
     int m_x;
     int m_y;
     BoardBlock* m_block;
 public:
-    static constexpr int TILE_SIZE = 100;
+    static constexpr int TILE_SIZE = 90;
 };
 
 

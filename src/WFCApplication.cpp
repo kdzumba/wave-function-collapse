@@ -7,7 +7,7 @@
 WFCApplication::WFCApplication()
 {
     m_window = new QMainWindow();
-    m_window ->resize(1200, 780);
+    m_window -> resize(1200, 780);
 }
 
 WFCApplication::~WFCApplication()

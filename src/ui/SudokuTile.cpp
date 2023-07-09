@@ -7,6 +7,14 @@
 
 SudokuTile::SudokuTile(QString  value, int x, int y): m_value(std::move(value)), m_x(x), m_y(y)
 {
+    if(m_x % 3 == 0)
+        m_border_left = true;
+    if(m_y % 3 == 0)
+        m_border_top = true;
+    if(m_x == 8)
+        m_border_right = true;
+    if(m_y == 8)
+        m_border_bottom = true;
 }
 
 void SudokuTile::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
