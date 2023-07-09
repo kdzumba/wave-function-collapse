@@ -11,16 +11,14 @@
 #include <QGraphicsView>
 #include "AbstractScene.h"
 
-class WorkSpace : public QWidget
+class WorkSpace : public QGraphicsView
 {
 public:
     WorkSpace();
-    QGraphicsView* get_graphics_view();
 private:
     void init_default_scenes();
 private:
     std::vector<std::unique_ptr<AbstractScene>> m_scene_states;
-    QGraphicsView* m_graphics_view;
     static int s_current_state_index;
 };
 
