@@ -47,7 +47,9 @@ private:
     static int constexpr BOARD_SIZE = 9;
     static int constexpr MIN_FULL_BLOCK_SIZE = 3;
     static int s_stack_counter;
+    static int s_retries_count;
     static int constexpr MAX_GENERATE_RETRIES = 10000;
+    static int constexpr MAX_RETRIES = 5;
 };
 
 #endif //WAVE_FUNCTION_COLLAPSE_BOARD_H

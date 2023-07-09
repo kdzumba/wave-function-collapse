@@ -11,6 +11,7 @@
 #include <fstream>
 
 int Board::s_stack_counter = 0;
+int Board::s_retries_count = 0;
 
 Board::Board()
 {
@@ -190,9 +191,16 @@ const std::vector<std::vector<std::unique_ptr<BoardBlock>>>& Board::solve()
 
     if(next_block == nullptr)
     {
-        std::cout << "Could not solve board, retrying" << std::endl;
-        reset();
-        init_solve();
+        if(s_retries_count < MAX_RETRIES)
+        {
+            std::cout << "Could not solve board, retrying" << std::endl;
+            reset();
+            init_solve();
+        }
+        else
+        {
+            // TODO: Need to handle this scenario by letting the client know that the board can't be solved
+        }
     }
     else
     {
@@ -538,4 +546,6 @@ void Board::reset()
     init_board();
     m_current_collapsed = nullptr;
     s_stack_counter = 0;
+
+    s_retries_count++;
 }
