@@ -13,10 +13,8 @@ class BoardBlock
 {
 public:
     BoardBlock();
-    BoardBlock(int collapsed_value);
+    explicit BoardBlock(int collapsed_value);
     std::vector<int>& get_available_options();
-    void exchange_previous(BoardBlock* previous, BoardBlock* next);
-    std::vector<int> get_remaining_options() const;
     int get_collapsed_value() const;
     void set_collapsed_value(int value);
     void set_coordinate(int x, int y);

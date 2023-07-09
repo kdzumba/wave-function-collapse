@@ -16,6 +16,7 @@ void SudokuTile::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
     if(m_value.toInt() != 0)
         painter -> drawText(m_x + TILE_SIZE / 2, m_y + TILE_SIZE / 2, m_value);
+    else painter ->setBackground(QBrush(QColor(100, 100, 50)));
 }
 
 QRectF SudokuTile::boundingRect() const

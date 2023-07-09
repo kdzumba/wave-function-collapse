@@ -220,9 +220,9 @@
 	"HEADERS" : 
 	[
 		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.h",
+			"C:/Users/User/CLionProjects/wave-function-collapse/src/WFCApplication.h",
 			"MU",
-			"UVLADIE3JM/moc_MainApplicationWindow.cpp",
+			"UVLADIE3JM/moc_WFCApplication.cpp",
 			null
 		],
 		[
@@ -320,7 +320,7 @@
 	"SOURCES" : 
 	[
 		[
-			"C:/Users/User/CLionProjects/wave-function-collapse/src/MainApplicationWindow.cpp",
+			"C:/Users/User/CLionProjects/wave-function-collapse/src/WFCApplication.cpp",
 			"MU",
 			null
 		],
