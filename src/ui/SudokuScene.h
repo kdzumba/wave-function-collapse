@@ -8,7 +8,7 @@
 
 #include <QGraphicsScene>
 #include "SudokuTile.h"
-#include "../models/BoardBlock.h"
+#include "../models/SudokuBlock.h"
 #include "AbstractScene.h"
 #include <vector>
 #include <memory>
@@ -18,12 +18,13 @@ class SudokuScene : public AbstractScene
     Q_OBJECT
 public:
     explicit SudokuScene();
+    virtual void animate() override;
 private:
     static int generateRandom();
 private:
     std::vector<std::vector<SudokuTile*>> m_tiles;
     static int constexpr BOARD_SIZE = 9;
-    std::vector<std::vector<std::unique_ptr<BoardBlock>>> m_board;
+    std::vector<std::vector<std::unique_ptr<SudokuBlock>>> m_board;
 };
 
 
