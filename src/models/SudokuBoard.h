@@ -31,7 +31,7 @@ private:
     bool is_fully_solved() const;
     static std::tuple<int, int> random_coordinate();
     static int generate_random_int(int start, int end);
-    bool update_previous_block(SudokuBlock *old);
+    void update_processing_chain(SudokuBlock *old);
     SudokuBlock* least_entropy_block();
     void propagate_collapse_info(int row, int col, const std::unique_ptr<BlockState>& state);
     void propagate_decollapse_info(int row, int col, const std::unique_ptr<BlockState>& state);
@@ -50,8 +50,8 @@ private:
     static int constexpr MIN_FULL_BLOCK_SIZE = 3;
     static int s_stack_counter;
     static int s_retries_count;
-    static int constexpr MAX_GENERATE_RETRIES = 200000;
-    static int constexpr MAX_RETRIES = 5;
+    static int constexpr MAX_GENERATE_RETRIES = 2000;
+    static int constexpr MAX_RETRIES = 100;
 };
 
 #endif //WAVE_FUNCTION_COLLAPSE_SUDOKUBOARD_H

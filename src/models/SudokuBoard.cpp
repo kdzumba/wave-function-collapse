@@ -112,8 +112,9 @@ void SudokuBoard::propagate_collapse_info(int row_number, int col_number, const 
 
 void SudokuBoard::collapse(SudokuBlock* block)
 {
-    if(block -> get_is_permanently_collapsed())
-        std::cout << "Tryna collapse a permananently collapsed block" << std::endl;
+    std::cout << "Before" << std::endl;
+    std::cout << "Setting block: x: " << std::get<0>(block -> get_coordinate()) << " , y: " << std::get<1>(block -> get_coordinate()) << std::endl;
+    print();
 
     auto rand_index = generate_random_int(0, (int) block->get_available_states().size() - 1);
     auto next_state = std::make_unique<BlockState>(*(block->get_available_states().at(rand_index)));
@@ -127,7 +128,8 @@ void SudokuBoard::collapse(SudokuBlock* block)
     //The current_block concept is used to prevent the currently collapsed block from being picked as the least_entropy_block
     block->make_current_block(true);
 
-    if(block != m_initial_block)
+    //The initial block doesn't have a previous as it's the first block to be processed
+    if(block != m_initial_block && block != m_current_collapsed)
         block->set_previous_block(m_current_collapsed);
 
     if(block -> get_previous_block() == block)
@@ -141,6 +143,8 @@ void SudokuBoard::collapse(SudokuBlock* block)
 
     m_current_collapsed = block;
     propagate_collapse_info(row_number, col_number, block -> get_collapsed_state());
+    std::cout << "After: " << std::endl;
+    print();
 }
 
 /**
@@ -159,6 +163,9 @@ SudokuBlock* SudokuBoard::backtrack()
     {
         to_reprocess = to_reprocess -> get_previous_block();
     }
+
+    if(to_reprocess == m_current_collapsed)
+        std::cout << "m_current_collapsed to be re_processed" << std::endl;
 
     if(to_reprocess == nullptr)
     {
@@ -213,7 +220,7 @@ const std::vector<std::vector<std::unique_ptr<SudokuBlock>>>& SudokuBoard::solve
         collapse(next_block);
     }
 
-    print();
+//    print();
 
     if(!is_fully_solved() && s_stack_counter < MAX_GENERATE_RETRIES)
         solve();
@@ -403,7 +410,7 @@ std::vector<std::unique_ptr<BlockState>> SudokuBoard::get_sqr_exclusions(int row
 void SudokuBoard::propagate_decollapse_info(int row, int col, const std::unique_ptr<BlockState>& state)
 {
     const auto& being_decollapsed = m_board.at(row).at(col).get();
-    auto is_previous_block_updated = update_previous_block(being_decollapsed);
+    update_processing_chain(being_decollapsed);
 
     //Every block in row should get state added to their available options
     for(const auto& block : m_board.at(row))
@@ -444,9 +451,6 @@ void SudokuBoard::propagate_decollapse_info(int row, int col, const std::unique_
                 block->add_available_state(state);
         }
     }
-
-    if(is_previous_block_updated)
-        being_decollapsed->set_previous_block(nullptr);
 }
 
 
@@ -508,11 +512,11 @@ bool SudokuBoard::is_safe(int row, int col, const std::unique_ptr<BlockState>& s
 /**
  * During de-collapse, we need to update the old block for all the blocks whose old was the block that's
  * being de-collapsed. Sometimes the block being de-collapsed is the same as the m_current_collapsed_block, and
- * we don't want a block to be itselfs previous
+ * we don't want a block to be itself's previous
  * @param old The block being de-collapsed
  * @return True if an exchange happened, false otherwise.
  */
-bool SudokuBoard::update_previous_block(SudokuBlock *old)
+void SudokuBoard::update_processing_chain(SudokuBlock *old)
 {
     for(const auto& row : m_board)
     {
@@ -521,12 +525,10 @@ bool SudokuBoard::update_previous_block(SudokuBlock *old)
             if(block->get_previous_block() == old)
             {
                 block->set_previous_block(old->get_previous_block());
-                old ->set_previous_block(nullptr);
-                return true;
+                old ->set_previous_block(m_current_collapsed);
             }
         }
     }
-    return false;
 }
 
 void SudokuBoard::read_from_file(const std::string &filename)
