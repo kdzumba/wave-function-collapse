@@ -17,6 +17,7 @@ SudokuBoard::SudokuBoard()
 {
     init_board();
     m_current_collapsed = nullptr;
+    m_initial_block = nullptr;
 }
 
 SudokuBoard::SudokuBoard(const std::string &filename): SudokuBoard{}
@@ -43,11 +44,11 @@ void SudokuBoard::init_board()
 void SudokuBoard::init_solve()
 {
     auto start_coordinate = random_coordinate();
-    int x = std::get<0>(start_coordinate);
-    int y = std::get<1>(start_coordinate);
+    int x = 2; //std::get<0>(start_coordinate);
+    int y = 8;//std::get<1>(start_coordinate);
 
-    const auto& initial_block = m_board.at(x).at(y);
-    collapse(initial_block.get());
+//    const auto& initial_block = m_board.at(x).at(y);
+    collapse(get_initial_block());
 }
 
 /**
@@ -111,21 +112,34 @@ void SudokuBoard::propagate_collapse_info(int row_number, int col_number, const 
 
 void SudokuBoard::collapse(SudokuBlock* block)
 {
+    if(block -> get_is_permanently_collapsed())
+        std::cout << "Tryna collapse a permananently collapsed block" << std::endl;
+
     auto rand_index = generate_random_int(0, (int) block->get_available_states().size() - 1);
     auto next_state = std::make_unique<BlockState>(*(block->get_available_states().at(rand_index)));
-    block->set_collapsed_state(std::move(next_state));
+
+    //Some of the blocks are already default-collapsed from reading the puzzle files, and these shouldn't be collapsed to
+    //something different. least_entropy_block() shouldn't consider them either, but checking if m_collapsed_state is a nullptr
+    //should take care of this in least_entropy_block()
+    if(!(block->get_is_permanently_collapsed()))
+        block->set_collapsed_state(std::move(next_state));
+
+    //The current_block concept is used to prevent the currently collapsed block from being picked as the least_entropy_block
     block->make_current_block(true);
 
-    if(m_current_collapsed != nullptr)
-        m_current_collapsed->make_current_block(false);
-
-    if(m_current_collapsed != nullptr && block != m_current_collapsed)
+    if(block != m_initial_block)
         block->set_previous_block(m_current_collapsed);
 
-    m_current_collapsed = block;
+    if(block -> get_previous_block() == block)
+        std::cout << "Pointing to itself" << std::endl;
+
     auto row_number = std::get<0>(block -> get_coordinate());
     auto col_number = std::get<1>(block -> get_coordinate());
 
+    if(m_current_collapsed == block)
+        std::cout << "current_collapsed and block to collapse are the same" << std::endl;
+
+    m_current_collapsed = block;
     propagate_collapse_info(row_number, col_number, block -> get_collapsed_state());
 }
 
@@ -137,30 +151,34 @@ void SudokuBoard::collapse(SudokuBlock* block)
 SudokuBlock* SudokuBoard::backtrack()
 {
     std::cout << "Backtracking" << std::endl;
-    auto current = m_current_collapsed;
+    auto to_reprocess = m_current_collapsed;
 
     //We need to go back through all previously set blocks until we find one where we could have
     //chosen another alternative
-    while(current != nullptr && current -> get_available_states().empty())
+    while(to_reprocess != nullptr && to_reprocess -> get_available_states().empty())
     {
-        current = current -> get_previous_block();
+        to_reprocess = to_reprocess -> get_previous_block();
     }
 
-    if(current == nullptr)
+    if(to_reprocess == nullptr)
     {
         //If we got here, it means we went all the way back to the first set block, which means the starting block
-        //Was not the right one to start with. We need to reset the board and re-solve from scracth.
+        //Was not the right one to start with. We need to reset the board and re-solve from scratch.
         //The option of finding another block that is unset doesn't solve the problem of there being a block in this
-        //current path that has an entropy of 0
+        //to_reprocess path that has an entropy of 0
         std::cout << "nullptr scenario occurred" << std::endl;
         return nullptr;
     }
 
-    auto current_collapsed_state = std::make_unique<BlockState>(*( current->get_collapsed_state()));
-    current->set_collapsed_state(std::make_unique<BlockState>(0));
-    propagate_decollapse_info(std::get<0>(current -> get_coordinate()), std::get<1>(current -> get_coordinate()), current_collapsed_state);
+    //Getting here means we found a block in the to_reprocess path(going backwards) that had more options to choose from
+    //then the one it collapsed to. We need to first de-collapse the to_reprocess block (set it to de-collapsed state, and
+    //propagate this de-collapse to other blocks so that they may also have this de-collapsed state in their available
+    //states again)
+    auto old_collapsed_state = std::make_unique<BlockState>(*( to_reprocess->get_collapsed_state()));
+    to_reprocess->set_collapsed_state(std::make_unique<BlockState>(0));
+    propagate_decollapse_info(std::get<0>(to_reprocess -> get_coordinate()), std::get<1>(to_reprocess -> get_coordinate()), old_collapsed_state);
 
-    return current;
+    return to_reprocess;
 }
 
 /**
@@ -238,7 +256,7 @@ SudokuBlock* SudokuBoard::least_entropy_block()
         for(const auto & block : row)
         {
             //Only consider blocks that haven't been collapsed yet
-            if(block->get_collapsed_state() != nullptr and block->get_collapsed_state() -> get_value() == 0)
+            if(!(block -> get_is_permanently_collapsed()))
             {
                 unsigned int key = block -> get_entropy();
                 if(entropy_to_block_map.find(key) != entropy_to_block_map.end() && key != 0)
@@ -256,7 +274,12 @@ SudokuBlock* SudokuBoard::least_entropy_block()
 
     auto min_entropy = entropy_to_block_map.begin() -> second;
     auto rand_index = generate_random_int(0, (int)(min_entropy.size() - 1));
-    return min_entropy.at(rand_index);
+
+    auto least_entropy_block = min_entropy.at(rand_index);
+    if(least_entropy_block == m_current_collapsed)
+        std::cout << "current_collapsed and least_entropy are the same" << std::endl;
+
+    return least_entropy_block;
 }
 
 /**
@@ -373,38 +396,39 @@ std::vector<std::unique_ptr<BlockState>> SudokuBoard::get_sqr_exclusions(int row
  *
  * @param row The row number for the de-collapsed block
  * @param col The col number for the de-collapsed block
- * @param value The value the block was de-collapsed to
+ * @param state The state the block was de-collapsed to
  * During backtracking, we need to reset some blocks that were previously collapsed before the current block. Doing so
- * entails putting the block's value back to available_options for that block
+ * entails putting the block's state back to available_options for that block
  */
-void SudokuBoard::propagate_decollapse_info(int row, int col, const std::unique_ptr<BlockState>& value)
+void SudokuBoard::propagate_decollapse_info(int row, int col, const std::unique_ptr<BlockState>& state)
 {
     const auto& being_decollapsed = m_board.at(row).at(col).get();
-    auto has_exchanged = exchange_previous(being_decollapsed);
+    auto is_previous_block_updated = update_previous_block(being_decollapsed);
 
-    //Every block in row should get value added to their available options
+    //Every block in row should get state added to their available options
     for(const auto& block : m_board.at(row))
     {
         auto current_row = std::get<0>(block -> get_coordinate());
         auto current_col = std::get<1>(block -> get_coordinate());
 
-        if (!(current_row == row && current_col == col) && is_safe(current_row, current_col, value))
+        if (!(row == current_row && col == current_col) && is_safe(current_row, current_col, state))
         {
-            block->add_available_state(value);
+            block->add_available_state(state);
         }
     }
 
-    //Every block in col should get value added back to their available options
+    //Every block in col should get state added back to their available options
     for(const auto& _row : m_board)
     {
         const auto& block = _row.at(col);
         auto current_row = std::get<0>(block -> get_coordinate());
         auto current_col = std::get<1>(block -> get_coordinate());
 
-        if(!(current_row == row && current_col == col) && is_safe(current_row, current_col, value))
-            block->add_available_state(value);
+        if(!(row == current_row && col == current_col) && is_safe(current_row, current_col, state))
+            block->add_available_state(state);
     }
 
+    //Every block in the 3x3 square grid should get state added back to their available options
     int start_row_index = row - row % MIN_FULL_BLOCK_SIZE;
     int start_col_index = col - col % MIN_FULL_BLOCK_SIZE;
 
@@ -416,12 +440,12 @@ void SudokuBoard::propagate_decollapse_info(int row, int col, const std::unique_
             auto current_row = std::get<0>(block -> get_coordinate());
             auto current_col = std::get<1>(block -> get_coordinate());
 
-            if(!(current_row == row && current_col == col) && is_safe(current_row, current_col, value))
-                block->add_available_state(value);
+            if(!(row == current_row && col == current_col) && is_safe(current_row, current_col, state))
+                block->add_available_state(state);
         }
     }
 
-    if(has_exchanged)
+    if(is_previous_block_updated)
         being_decollapsed->set_previous_block(nullptr);
 }
 
@@ -448,44 +472,56 @@ void SudokuBoard::print_available_options()
 }
 
 /**
- * Before adding a value back to a block's available options, we need to check if it's still a safe option for the block
+ * Before adding a state back to a block's available options, we need to check if it's still a safe option for the block
  * as this might have changed due to some change that has already happened on the board
  * @param row The row number at which the block is found
  * @param col The col number at which the block is found
- * @param value The value we'd like to place back into available options for the block
+ * @param state The state we'd like to place back into available options for the block
  * @return True if placing the option doesn't violate constraints of the game, false otherwise
  */
-bool SudokuBoard::is_safe(int row, int col, const std::unique_ptr<BlockState>& value)
+bool SudokuBoard::is_safe(int row, int col, const std::unique_ptr<BlockState>& state)
 {
     auto row_exclusions = get_row_exclusions(row);
-    if(std::find(row_exclusions.begin(), row_exclusions.end(), value) != row_exclusions.end())
-        return false;
+    bool is_row_safe = true, is_col_safe = true, is_block_safe = true;
+
+    auto is_state_excluded = [&](const std::unique_ptr<BlockState>& s) -> bool {
+        return state -> get_value() == s -> get_value();
+    };
+
+    auto row_safe_iter = std::find_if(row_exclusions.begin(), row_exclusions.end(),is_state_excluded);
+    if(row_safe_iter != row_exclusions.end())
+        is_row_safe = false;
 
     auto col_exclusions = get_col_exclusions(col);
-    if(std::find(col_exclusions.begin(), col_exclusions.end(), value) != col_exclusions.end())
-        return false;
+    auto col_safe_iter = std::find_if(col_exclusions.begin(), col_exclusions.end(), is_state_excluded);
+    if(col_safe_iter != col_exclusions.end())
+        is_col_safe = false;
 
     auto sqr_exclusions = get_sqr_exclusions(row, col);
-    if(std::find(sqr_exclusions.begin(), sqr_exclusions.end(), value) != sqr_exclusions.end())
-        return false;
-    return true;
+    auto sqr_safe_iter = std::find_if(sqr_exclusions.begin(), sqr_exclusions.end(), is_state_excluded);
+    if(sqr_safe_iter != sqr_exclusions.end())
+        is_block_safe = false;
+
+    return is_row_safe && is_col_safe && is_block_safe;
 }
 
 /**
- * During de-collapse, we need to update the previous block for all the blocks whose previous was the block that's
- * being de-collapsed
- * @param previous The block being de-collapsed
+ * During de-collapse, we need to update the old block for all the blocks whose old was the block that's
+ * being de-collapsed. Sometimes the block being de-collapsed is the same as the m_current_collapsed_block, and
+ * we don't want a block to be itselfs previous
+ * @param old The block being de-collapsed
  * @return True if an exchange happened, false otherwise.
  */
-bool SudokuBoard::exchange_previous(SudokuBlock *previous)
+bool SudokuBoard::update_previous_block(SudokuBlock *old)
 {
     for(const auto& row : m_board)
     {
         for(const auto& block : row)
         {
-            if(block->get_previous_block() == previous) {
-                std::cout << "Swapping occurred" << std::endl;
-                block->set_previous_block(previous->get_previous_block());
+            if(block->get_previous_block() == old)
+            {
+                block->set_previous_block(old->get_previous_block());
+                old ->set_previous_block(nullptr);
                 return true;
             }
         }
@@ -520,6 +556,9 @@ void SudokuBoard::read_from_file(const std::string &filename)
             const auto& block = m_board.at(row_index).at(col_index);
             block->set_collapsed_state(std::move(state));
             propagate_collapse_info(row_index, col_index, block->get_collapsed_state());
+
+            if(value != 0)
+                block->set_permanently_collapsed(true);
             col_index++;
         }
         row_index++;
@@ -533,9 +572,34 @@ void SudokuBoard::reset()
     m_board.clear();
     init_board();
     m_current_collapsed = nullptr;
+    m_initial_block = nullptr;
     s_stack_counter = 0;
     s_retries_count++;
 
     //TODO: Don't like having to read from file again, will need to find a way to save the initial state
     read_from_file(m_puzzle_file);
+}
+
+/**
+ * We need the initial block with which we start to solve to not be one of the default_collapsed_blocks
+ * @return A Non-default_collapsed first block with which we initiate the solve
+ */
+SudokuBlock *SudokuBoard::get_initial_block()
+{
+    std::vector<std::tuple<int, int>> coordinates_to_process;
+
+    for(auto& row : m_board)
+    {
+        for(const auto& block : row)
+        {
+            if(!(block->get_is_permanently_collapsed()))
+            {
+                coordinates_to_process.emplace_back(block -> get_coordinate());
+            }
+        }
+    }
+    auto rand_index = generate_random_int(0, (int)coordinates_to_process.size() - 1);
+    auto initial_coordinate = coordinates_to_process.at(rand_index);
+    const auto& initial_block = m_board.at(std::get<0>(initial_coordinate)).at(std::get<1>(initial_coordinate));
+    return initial_block.get();
 }

@@ -28,12 +28,15 @@ public:
     void set_previous_block(SudokuBlock* previous);
     void add_available_state(const std::unique_ptr<BlockState>& option);
     void set_available_states(const std::vector<std::unique_ptr<BlockState>>& options);
+    bool get_is_permanently_collapsed() const;
+    void set_permanently_collapsed(bool is_collapsed);
 private:
     SudokuBlock* m_previous;
     bool m_is_current_block;
     std::unique_ptr<BlockState> m_collapsed_state;
     std::tuple<int, int> m_coordinate;
     std::vector<std::unique_ptr<BlockState>> m_available_states;
+    bool m_is_permanently_collapsed;
 };
 
 

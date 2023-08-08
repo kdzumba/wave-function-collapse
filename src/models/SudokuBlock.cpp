@@ -6,7 +6,8 @@
 #include <utility>
 #include "SudokuBlock.h"
 
-SudokuBlock::SudokuBlock(): m_previous(nullptr), m_is_current_block(false), m_coordinate(std::make_tuple(0, 0))
+SudokuBlock::SudokuBlock(): m_previous(nullptr), m_is_current_block(false), m_coordinate(std::make_tuple(0, 0)),
+m_is_permanently_collapsed(false)
 {
     for(int i = 1; i <= 9; i++)
     {
@@ -45,7 +46,7 @@ void SudokuBlock::set_collapsed_state(std::unique_ptr<BlockState> state)
  */
 unsigned int SudokuBlock::get_entropy() const
 {
-    if(this -> m_is_current_block)
+    if(m_is_current_block || m_is_permanently_collapsed)
         return INT_MAX;
     return m_available_states.size();
 }
@@ -119,4 +120,16 @@ void SudokuBlock::set_available_states(const std::vector<std::unique_ptr<BlockSt
     {
         m_available_states.emplace_back(std::make_unique<BlockState>(*option));
     }
+}
+
+bool SudokuBlock::get_is_permanently_collapsed() const
+{
+    return m_is_permanently_collapsed;
+}
+
+void SudokuBlock::set_permanently_collapsed(bool is_collapsed)
+{
+    //permanently collapsed blocks should have a maximum entropy and no available states
+    m_is_permanently_collapsed = is_collapsed;
+    m_available_states.clear();
 }

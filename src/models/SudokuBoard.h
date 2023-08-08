@@ -31,7 +31,7 @@ private:
     bool is_fully_solved() const;
     static std::tuple<int, int> random_coordinate();
     static int generate_random_int(int start, int end);
-    bool exchange_previous(SudokuBlock *previous);
+    bool update_previous_block(SudokuBlock *old);
     SudokuBlock* least_entropy_block();
     void propagate_collapse_info(int row, int col, const std::unique_ptr<BlockState>& state);
     void propagate_decollapse_info(int row, int col, const std::unique_ptr<BlockState>& state);
@@ -39,11 +39,12 @@ private:
     std::vector<std::unique_ptr<BlockState>> get_col_exclusions(int col_number);
     std::vector<std::unique_ptr<BlockState>> get_sqr_exclusions(int row_number, int col_number);
     bool is_safe(int row, int col, const std::unique_ptr<BlockState>& state);
-
+    SudokuBlock* get_initial_block();
 private:
     std::vector<std::vector<std::unique_ptr<SudokuBlock>>> m_board;
     std::vector<std::vector<std::unique_ptr<SudokuBlock>>> m_initial_state;
     SudokuBlock* m_current_collapsed;
+    SudokuBlock* m_initial_block;
     std::string m_puzzle_file;
     static int constexpr BOARD_SIZE = 9;
     static int constexpr MIN_FULL_BLOCK_SIZE = 3;
