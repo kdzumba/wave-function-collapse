@@ -9,5 +9,6 @@
 
 class AbstractScene : public QGraphicsScene
 {
+    virtual void animate() = 0;
 };
 #endif //WAVE_FUNCTION_COLLAPSE_ABSTRACTSCENE_H

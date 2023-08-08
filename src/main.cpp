@@ -1,6 +1,6 @@
 #include <QApplication>
 #include "ui/SudokuTile.h"
-#include "models/Board.h"
+#include "models/SudokuBoard.h"
 #include "WFCApplication.h"
 #include "ui/WorkSpace.h"
 

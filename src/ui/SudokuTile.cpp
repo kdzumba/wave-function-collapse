@@ -33,7 +33,7 @@ QRectF SudokuTile::boundingRect() const
     return {0, 0, TILE_SIZE, TILE_SIZE};
 }
 
-SudokuTile::SudokuTile(BoardBlock* block)
+SudokuTile::SudokuTile(SudokuBlock* block)
 {
     m_block = block;
 }

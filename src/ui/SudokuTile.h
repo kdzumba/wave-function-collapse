@@ -9,13 +9,13 @@
 #include <QWidget>
 #include <QGraphicsItem>
 #include <QPainter>
-#include "../models/BoardBlock.h"
+#include "../models/SudokuBlock.h"
 
 class SudokuTile : public QGraphicsItem
 {
 public:
     explicit SudokuTile(QString  value, int x, int y);
-    explicit SudokuTile(BoardBlock* block);
+    explicit SudokuTile(SudokuBlock* block);
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 private:
@@ -26,7 +26,7 @@ private:
     bool m_border_right;
     int m_x;
     int m_y;
-    BoardBlock* m_block;
+    SudokuBlock* m_block;
 public:
     static constexpr int TILE_SIZE = 90;
 };
